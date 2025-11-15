@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Add Red Border to Images</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      padding: 20px;
+    }
+    input[type="file"] {
+      margin-bottom: 20px;
+    }
+    .downloads {
+      margin-top: 20px;
+    }
+    canvas {
+      display: none;
+    }
+  </style>
+</head>
+<body>
+
+  <h2>Add Red Border to Images</h2>
+  <input type="file" id="imageInput" accept="image/png, image/jpeg" multiple>
+  <div class="downloads" id="downloads"></div>
+
+  <script>
+    document.getElementById('imageInput').addEventListener('change', function(event) {
+      const files = event.target.files;
+      const downloadsDiv = document.getElementById('downloads');
+      downloadsDiv.innerHTML = "";
+
+      Array.from(files).forEach(file => {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          const img = new Image();
+          img.onload = function() {
+            const borderSize = 3;  // Updated to 3px
+            const canvas = document.createElement('canvas');
+            canvas.width = img.width + 2 * borderSize;
+            canvas.height = img.height + 2 * borderSize;
+            const ctx = canvas.getContext('2d');
+
+            // Fill red border
+            ctx.fillStyle = 'red';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Draw image in center
+            ctx.drawImage(img, borderSize, borderSize);
+
+            canvas.toBlob(blob => {
+              const link = document.createElement('a');
+              link.href = URL.createObjectURL(blob);
+              link.download = file.name;
+              link.textContent = "Download " + file.name;
+              link.style.display = 'block';
+              downloadsDiv.appendChild(link);
+            }, 'image/png');
+          };
+          img.src = e.target.result;
+        };
+        reader.readAsDataURL(file);
+      });
+    });
+  </script>
+
+</body>
+</html>
